@@ -181,7 +181,7 @@ const initMetrics: Function = (config: IPreMiddlewareConfig): IBundleMetrics => 
     const labelNames = ['path', 'status_code', 'method'];
 
     if (config.labelNames){
-      labelNames.push(...config.labelNames);
+      labelNames.push(...Object.keys(config.labelNames));
     }
 
     debug('Init http_request_duration_seconds status metrics');
@@ -288,6 +288,9 @@ export const preMiddleware: Function =
                 const labels: client.labelValues = {
                   status_code: (res2 && res2.statusCode) ? res2.statusCode : 0,
                 };
+                if (config.labelNames) {
+                  Object.assign(labels, config.labelNames);
+                }
                 debug('End timer for %s %s', req.method, path);
                 timerEnd(labels);
               });
@@ -300,6 +303,9 @@ export const preMiddleware: Function =
                   method     : req.method,
                   status_code: (res2 && res2.statusCode) ? res2.statusCode : 0,
                 };
+                if (config.labelNames) {
+                  Object.assign(labels, config.labelNames);
+                }
                 debug('Incrementing http_request_duration_seconds code %o', labels);
                 metrics.pathCount.inc(labels);
               });
