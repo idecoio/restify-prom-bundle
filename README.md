@@ -55,7 +55,7 @@ Default metrics :
 | Name          | Metric Name           | Type        | Description |
 | ---------     | ---------             | ---------   | ---------   |
 | status        | restify_status_codes  | [Counter](https://github.com/siimon/prom-client#counter)      | Number of response for each HTTP status code with `status_code` as label. |
-| pathDuration  | restify_path_duration | [Histogram](https://github.com/siimon/prom-client#histogram)  | Duration (seconds) by percentiles taken by each restify-defined path to generate the response with the `path`, `status_code` and the `method` as labels.  |
+| pathDuration  | http_request_duration_seconds | [Histogram](https://github.com/siimon/prom-client#histogram)  | Duration (seconds) by percentiles taken by each restify-defined path to generate the response with the `path`, `status_code` and the `method` as labels.  |
 | pathCount     | restify_path_count    | [Counter](https://github.com/siimon/prom-client#counter)      | Number of calls to each path with the `path`, `status_code` and the `method` as labels. |
 
 `duration` metrics precision will depends on the pre-middleware registering order, the sooner you register (first `server.pre()` call), the better it will be.
@@ -70,9 +70,9 @@ If a huge number of different non-routed requests (404) are sent to the server, 
 In addition, the prometheus (and grafana) service that uses this probes will be flooded.
 To prevent this situation, number of measured paths are limited to `maxPathsToCount`.
 
-This does not affect `restify_path_duration` as it only measures the restify-defined paths, nor `restify_status_codes` as it's limited to HTTP status codes.
+This does not affect `http_request_duration_seconds` as it only measures the restify-defined paths, nor `restify_status_codes` as it's limited to HTTP status codes.
 
-Once `maxPathsToMeasure` paths are measured, every new paths will be ignored for `restify_path_duration` and `restify_path_count`.
+Once `maxPathsToMeasure` paths are measured, every new paths will be ignored for `http_request_duration_seconds` and `restify_path_count`.
 
 ## Grafana dashboard
 

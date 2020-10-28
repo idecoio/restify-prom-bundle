@@ -43,6 +43,14 @@ export interface IPreMiddlewareConfig {
    * How many path at max should we count.
    */
   maxPathsToCount?: number;
+  /**
+   * Buckets for http_request_duration_seconds histogram
+   */
+  buckets?: number[];
+  /**
+   * Additional labels for http_request_duration_seconds histogram
+   */
+  labelNames?: string[];
 }
 
 /**
@@ -160,7 +168,7 @@ const checkConfig: Function = (userConfig?: IPreMiddlewareConfig): IPreMiddlewar
  */
 const initMetrics: Function = (config: IPreMiddlewareConfig): IBundleMetrics => {
   const metrics: IBundleMetrics = {};
-
+  
   if (config.defaults.indexOf('status') !== -1) {
     debug('Init restify_status_codes status metrics');
     metrics.status = new client.Counter({
@@ -170,12 +178,22 @@ const initMetrics: Function = (config: IPreMiddlewareConfig): IBundleMetrics => 
     });
   }
   if (config.defaults.indexOf('pathDuration') !== -1) {
-    debug('Init restify_path_duration status metrics');
-    metrics.pathDuration = new client.Histogram({
-      name      : 'restify_path_duration',
+    const labelNames = ['path', 'status_code', 'method'];
+
+    if (config.labelNames){
+      labelNames.push(...config.labelNames);
+    }
+
+    debug('Init http_request_duration_seconds status metrics');
+    const options: any = {
+      name      : 'http_request_duration_seconds',
       help      : 'Histogram of response time in seconds for each request path / status code',
-      labelNames: ['path', 'status_code', 'method'],
-    });
+      labelNames,
+    };
+    if (config.buckets){
+      options.buckets = config.buckets;
+    }
+    metrics.pathDuration = new client.Histogram(options);
   }
   if (config.defaults.indexOf('pathCount') !== -1) {
     debug('Init restify_path_count status metrics');
@@ -259,7 +277,7 @@ export const preMiddleware: Function =
                 metrics.status.inc({status_code: res2.statusCode});
               });
             }
-            // restify_path_duration if enabled and restify-defined route
+            // http_request_duration_seconds if enabled and restify-defined route
             if (metrics.pathDuration && !routeFindError) {
               debug('Starting timer for %s %s', req.method, path);
               const timerEnd: Function = metrics.pathDuration.startTimer({
@@ -282,7 +300,7 @@ export const preMiddleware: Function =
                   method     : req.method,
                   status_code: (res2 && res2.statusCode) ? res2.statusCode : 0,
                 };
-                debug('Incrementing restify_path_duration code %o', labels);
+                debug('Incrementing http_request_duration_seconds code %o', labels);
                 metrics.pathCount.inc(labels);
               });
             }

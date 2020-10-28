@@ -65,7 +65,7 @@ describe('`defaults` options', () => {
     return expect(
       Bluebird.all([
         testMetricPresent('restify_status_codes', 'counter'),
-        testMetricPresent('restify_path_duration', 'histogram'),
+        testMetricPresent('http_request_duration_seconds', 'histogram'),
         testMetricPresent('restify_path_count', 'counter'),
       ])
     ).to.eventually.be.fulfilled;
@@ -81,7 +81,7 @@ describe('`defaults` options', () => {
         // Should not be present.
         [
           ['restify_status_codes', 'counter'],
-          ['restify_path_duration', 'histogram'],
+          ['http_request_duration_seconds', 'histogram'],
           ['restify_path_count', 'counter'],
         ]
       ],
@@ -94,7 +94,7 @@ describe('`defaults` options', () => {
         ],
         // Should not be present.
         [
-          ['restify_path_duration', 'histogram'],
+          ['http_request_duration_seconds', 'histogram'],
           ['restify_path_count', 'counter'],
         ]
       ],
@@ -103,7 +103,7 @@ describe('`defaults` options', () => {
         ['pathDuration', 'pathCount'],
         // Should be present.
         [
-          ['restify_path_duration', 'histogram'],
+          ['http_request_duration_seconds', 'histogram'],
           ['restify_path_count', 'counter'],
         ],
         // Should not be present.
